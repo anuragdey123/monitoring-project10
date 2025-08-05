@@ -1,0 +1,36 @@
+- name: Build and run Prometheus container
+  hosts: monitoring
+  become: true
+  tasks:
+    - name: Create prometheus directory
+      file:
+        path: /tmp/prometheus-build
+        state: directory
+
+    - name: Copy Dockerfile
+      copy:
+        src: Dockerfile
+        dest: /tmp/prometheus-build/Dockerfile
+
+    - name: Copy prometheus config
+      copy:
+        src: prometheus.yml
+        dest: /tmp/prometheus-build/prometheus.yml
+
+    - name: Build Prometheus image
+      docker_image:
+        name: custom-prometheus
+        tag: latest
+        source: build
+        build:
+          path: /tmp/prometheus-build
+        state: present
+
+    - name: Run Prometheus container
+      docker_container:
+        name: prometheus
+        image: custom-prometheus:latest
+        ports:
+          - "9090:9090"
+        state: started
+        restart_policy: unless-stopped

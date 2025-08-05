@@ -1,0 +1,33 @@
+- name: Build and run Grafana container
+  hosts: monitoring
+  become: true
+  tasks:
+    - name: Create grafana directory
+      file:
+        path: /tmp/grafana-build
+        state: directory
+
+    - name: Copy Dockerfile
+      copy:
+        src: Dockerfile
+        dest: /tmp/grafana-build/Dockerfile
+
+    - name: Build Grafana image
+      docker_image:
+        name: custom-grafana
+        tag: latest
+        source: build
+        build:
+          path: /tmp/grafana-build
+        state: present
+
+    - name: Run Grafana container
+      docker_container:
+        name: grafana
+        image: custom-grafana:latest
+        ports:
+          - "3000:3000"
+        state: started
+        restart_policy: unless-stopped
+        env:
+          GF_SECURITY_ADMIN_PASSWORD: admin

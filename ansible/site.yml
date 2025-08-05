@@ -1,0 +1,5 @@
+- import_playbook: install-docker.yml
+- import_playbook: prometheus/prometheus-container.yml
+- import_playbook: node-exporter/node-exporter-container.yml
+- import_playbook: grafana/grafana-container.yml
+

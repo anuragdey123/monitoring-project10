@@ -1,0 +1,31 @@
+- name: Build and run Node Exporter
+  hosts: monitoring
+  become: true
+  tasks:
+    - name: Create node-exporter directory
+      file:
+        path: /tmp/node-exporter-build
+        state: directory
+
+    - name: Copy Dockerfile
+      copy:
+        src: Dockerfile
+        dest: /tmp/node-exporter-build/Dockerfile
+
+    - name: Build Node Exporter image
+      docker_image:
+        name: custom-node-exporter
+        tag: latest
+        source: build
+        build:
+          path: /tmp/node-exporter-build
+        state: present
+
+    - name: Run Node Exporter container
+      docker_container:
+        name: node-exporter
+        image: custom-node-exporter:latest
+        ports:
+          - "9100:9100"
+        state: started
+        restart_policy: unless-stopped
